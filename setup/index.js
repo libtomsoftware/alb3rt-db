@@ -1,9 +1,11 @@
 const core = require('alb3rt-core'),
+    api = require('../api'),
     CONFIG = core.config,
     logger = core.logger,
     FILE_ID = 'setup',
     ENV = process.env,
     dbAddress = ENV.MONGODB_ADDRESS,
+    dbName = ENV.MONGODB_NAME,
     dbUser = ENV.MONGODB_USER,
     dbPassword = ENV.MONGODB_PASSWORD;
 
@@ -20,12 +22,14 @@ module.exports = new class Alb3rtDBSetup {
     setupDbDetails(mongodb) {
         CONFIG.DB = Object.assign({}, CONFIG.DB, {
             CLIENT: mongodb.MongoClient,
-            URL: `mongodb://${dbUser}:${dbPassword}@${dbAddress}`
+            URL: `mongodb://${dbUser}:${dbPassword}@${dbAddress}`,
+            NAME: dbName
         });
     }
 
     hasAllDbParams() {
         return [
+            dbName,
             dbAddress,
             dbUser,
             dbPassword
@@ -34,7 +38,8 @@ module.exports = new class Alb3rtDBSetup {
 
     testDbConnection() {
         logger.log(FILE_ID, 'Attempting to establish connection with db ...');
-        CONFIG.DB.CLIENT.connect(CONFIG.DB.URL, (error, db) => {
+
+        CONFIG.DB.CLIENT.connect(`${CONFIG.DB.URL}/${CONFIG.DB.NAME}`, (error, db) => {
             if (error) {
                 logger.error(FILE_ID, `Database connection error: ${error}`);
                 return;
@@ -42,6 +47,7 @@ module.exports = new class Alb3rtDBSetup {
 
             logger.info(FILE_ID, 'Connection with database established successfully.');
             db.close();
+            api.init();
         });
     }
 }
