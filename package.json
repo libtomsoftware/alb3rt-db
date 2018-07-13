@@ -1,6 +1,6 @@
 {
   "name": "alb3rt-db",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Alb3rt DB",
   "main": "index.js",
   "scripts": {
